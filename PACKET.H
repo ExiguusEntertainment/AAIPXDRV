@@ -46,6 +46,7 @@ typedef struct {
     T_byte8    prefix            PACK;
     T_byte8    packetLength      PACK;
     T_word32   id                PACK;
+    T_directTalkUniqueAddress sender PACK;
     T_word16   checksum          PACK;
 } T_packetHeader ;
 

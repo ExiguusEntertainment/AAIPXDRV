@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <time.h>
 #include <conio.h>
+#include <stdio.h>
 
 /* The following option turns on the use of the profiler program. */
 //#define COMPILE_OPTION_RUN_PROFILER
@@ -49,6 +50,7 @@ T_void IPXDriverSend(
     } else {
         /* Yes, got a packet. */
         *p_size = sizeof(T_packetLong) ;
+printf("Yes, got a packet. Size set to %d\n", *p_size);
         *p_anyData = TRUE ;
 //puts("got packet") ; fflush(stdout) ;
     }
@@ -70,145 +72,6 @@ T_void IPXDriverConnect(T_void *p_data)
 
     InitNetwork() ;
 
-#if 0
-    if (CommCheckClientAndServerExist() == FALSE)  {
-        printf("Breaking line ... ") ;  fflush(stdout) ;
-        CommSetActivePortN(0) ;
-        delay(2000) ;
-        CommSendData("+++", 3) ;
-        delay(2000) ;
-		sprintf(call, "ATZ\r", p_dial) ;
-        puts("OK") ;
-
-        if (stricmp(p_dial, "ANSWER") == 0)  {
-            puts("Waiting for caller.") ;
-
-            /* Read in the OK from the file. */
-            while (CommGetReadBufferLength())  {
-                c = CommReadByte() ;
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-            }
-
-            /* Wait for CONNECT response. */
-            c = 0 ;
-            do {
-                if (CommGetReadBufferLength() > 0)  {
-                    c = CommReadByte() ;
-                }
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-            } while (c != 'C') ;
-        } else {
-            puts("Connecting to server.") ;
-
-            timeStart = TickerGet()+ (45 * CLK_TCK) ;
-            while (CommGetReadBufferLength())  {
-                c = CommReadByte() ;
-
-                if (TickerGet() > timeStart)  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_TIMED_OUT) ;
-                    DebugEnd() ;
-                    return ;
-                }
-
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-            }
-
-            /* Dial the number. */
-            DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_DIALING) ;
-            CommSendData(call, strlen(call)) ;
-
-            c = 0 ;
-            do {
-                if (CommGetReadBufferLength() > 0)
-                    c = CommReadByte() ;
-                if (TickerGet() > timeStart)  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_TIMED_OUT) ;
-                    DebugEnd() ;
-                    return ;
-                }
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-            } while (c != 'O') ;
-
-            do {
-                if (CommGetReadBufferLength() > 0)  {
-                    c = CommReadByte() ;
-                }
-                if (TickerGet() > timeStart)  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_TIMED_OUT) ;
-                    DebugEnd() ;
-                    return ;
-                }
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-		    } while ((c != '\n') && (c != '\r')) ;
-
-            puts("Modem initialized.  Dialing now.") ;
-		    sprintf(call, "ATDT%s\r", p_dial) ;
-            CommSendData(call, strlen(call)) ;
-
-            do {
-                if (CommGetReadBufferLength() > 0)  {
-                    c = CommReadByte() ;
-                }
-                if (TickerGet() > timeStart)  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_TIMED_OUT) ;
-                    DebugEnd() ;
-                    return ;
-                }
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-            } while ((c != 'C') && (c != 'B')) ;
-
-            d = c ;
-            do {
-                if (CommGetReadBufferLength() > 0)  {
-                    c = CommReadByte() ;
-                }
-                if (TickerGet() > timeStart)  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_TIMED_OUT) ;
-                    DebugEnd() ;
-                    return ;
-                }
-                if (kbhit())  {
-                    DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_ABORTED) ;
-                    DebugEnd() ;
-                    return ;
-                }
-		    } while ((c != '\n') && (c != '\r')) ;
-
-            /* Check to see if we were given a busy signal. */
-            if (d == 'B')  {
-                puts("IPX DRIVER: BUSY") ;
-                DirectTalkSetLineStatus(DIRECT_TALK_LINE_STATUS_BUSY) ;
-                DebugEnd() ;
-                return ;
-            }
-        }
-    }
-
-#endif
     puts("IPX DRIVER: CONNECTED") ;
 
     /* Must of connect, no problems. */
@@ -227,46 +90,6 @@ T_void IPXDriverDisconnect(T_void)
     DebugEnd() ;
 }
 
-#if 0
-T_void TestA(T_void)
-{
-    T_word32 i ;
-
-    T_byte8 test[80] = "test" ;
-    T_byte8 buffer[180] ;
-
-    puts("I'm tesa") ;
-    for (i=0; (!kbhit()); i++)  {
-        if ((i & 0x7FFF)==0)   {
-            IPXSend("tesa", 5) ;
-            puts("Send") ;
-        }
-
-        if (IPXGet(buffer) == TRUE)
-            printf("ipx got: %4.4s\n", buffer) ;
-    }
-}
-
-T_void TestB(T_void)
-{
-    T_word32 i ;
-
-    T_byte8 test[80] = "test" ;
-    T_byte8 buffer[180] ;
-
-    puts("I'm tesb") ;
-    for (i=0; (!kbhit()); i++)  {
-        if ((i & 0x7FFF)==0)   {
-            IPXSend("tesb", 5) ;
-            puts("Send") ;
-        }
-
-        if (IPXGet(buffer) == TRUE)
-            printf("ipx got: %4.4s\n", buffer) ;
-    }
-}
-#endif
-
 T_void main(int argc, char *argv[])
 {
     T_directTalkHandle handle ;
@@ -278,7 +101,7 @@ T_void main(int argc, char *argv[])
 
     DebugRoutine("main (IPX Driver v1.0)") ;
 
-    printf("USA IPX Driver v1.01 (%s)\n", __DATE__) ;
+    printf("USA IPX Driver v1.02 (%s)\n", __DATE__) ;
     puts("----------------------------------") ;
 
     InitNetwork() ;

@@ -68,7 +68,7 @@ typedef struct
 	T_IPXPacket       ipx;
 
 	T_word32 time;
-	T_byte8 data[512];
+	T_byte8 data[1512];
 } T_packet;
 
 

@@ -233,19 +233,29 @@ E_Boolean IPXGet(T_packetLong *p_packet)
 
     /* Set remote address to the sender of the packet. */
 	memcpy(&remoteadr, packet->ipx.sNode, sizeof(remoteadr));
-/*
-printf("recv: ") ;
+printf("recvfrom: ") ;
 for (i=0; i<6; i++)
   printf("<%02X>", remoteadr.node[i]) ;
 puts("") ;
-*/
+printf("recvto: ") ;
+for (i=0; i<6; i++)
+  printf("<%02X>", G_localAddr.node[i]) ;
+puts("") ;
+printf("recvfromsNode: ") ;
+for (i=0; i<6; i++)
+  printf("<%02X>", packet->ipx.sNode[i]) ;
+puts("") ;
 
 // copy out the data
 //	doomcom.datalength = ShortSwap(packet->ipx.PacketLength) - 38;
     datalength = ShortSwap(packet->ipx.packetLength) ;
 //printf("length = %d\n", datalength) ;
-    if (datalength > LONG_PACKET_LENGTH)
-        datalength = LONG_PACKET_LENGTH ;
+printf("recv: (len=%d)", datalength) ;
+for (i=0; i<datalength; i++)
+  printf("<%02X>", packet->data[i]) ;
+puts("") ;
+    if (datalength > sizeof(packet->data))
+        datalength = sizeof(packet->data) ;
 	memcpy (p_packet, &packet->data, datalength);
 
 // repost the ECB
@@ -265,6 +275,7 @@ T_void IPXSend(T_void *p_data, T_word16 size)
     struct SREGS sregs ;
 	T_sword16 j ;
 
+printf("IPXSend: size %d\n", size);
     /* find a free packet buffer to use */
 	while (G_packetArray[0].ecb.InUseFlag)
 	{
@@ -313,6 +324,7 @@ printf("\n") ;  fflush(stdout) ;
 
     /* put the data into an ipx packet */
 	memcpy(&G_packetArray[0].data, p_data, size);
+printf("IPXSend: ecb.fSize %d (sizeof T_IPXPacket = %d)\n", G_packetArray[0].ecb.fSize, sizeof(T_IPXPacket));
 
     /* send the packet */
     segread(&sregs) ;
